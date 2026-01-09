@@ -22,13 +22,42 @@
   "ServiceWiringFiles": [
     "includes/ServiceWiring.php"
   ],
-  "HookHandlers": {},
-  "Hooks": {},
+  "HookHandlers": {
+    "main": {
+      "class": "Telepedia\\Extensions\\Agora\\Hooks\\MainHandler"
+    },
+    "schema": {
+      "class": "Telepedia\\Extensions\\Agora\\Hooks\\SchemaHandler"
+    }
+  },
+  "Hooks": {
+    "BeforePageDisplay": "main",
+    "MakeGlobalVariablesScript": "main",
+    "LoadExtensionSchemaUpdates": "schema"
+  },
   "ResourceFileModulePaths": {
     "localBasePath": "resources",
     "remoteExtPath": "Agora/resources"
   },
-  "ResourceModules": {},
+  "ResourceModules": {
+    "ext.agora.comments": {
+      "class": "MediaWiki\\ResourceLoader\\CodexModule",
+      "packageFiles": [
+        "ext.agora.comments/index.js",
+        "ext.agora.comments/Agora.vue",
+        "ext.agora.comments/store.js"
+      ],
+      "messages": [
+        "agora-comments-header"
+      ],
+      "dependencies": [
+        "pinia"
+      ],
+      "codexComponents": [
+        "CdxButton"
+      ]
+    }
+  },
   "ConfigRegistry": {
     "Agora": "MediaWiki\\Config\\GlobalVarConfig::newInstance"
   },

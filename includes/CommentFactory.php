@@ -10,6 +10,16 @@ use Wikimedia\Rdbms\Platform\ISQLPlatform;
 
 class CommentFactory {
 
+	/**
+	 * Table name for the comment table to avoid writing it all the time
+	 */
+	private const TABLE_NAME = 'agora_comments';
+
+	/**
+	 * Table name for the revision table to avoid writing it all the time
+	 */
+	private const REVISION_TABLE_NAME = 'agora_comment_revisions';
+
 	public function __construct(
 		private readonly IConnectionProvider $connectionProvider
 	) {}
@@ -24,7 +34,7 @@ class CommentFactory {
 
 		$row = $dbr->newSelectQueryBuilder()
 			->select( ISQLPlatform::ALL_ROWS )
-			->from( 'agora_comments' )
+			->from( self::TABLE_NAME )
 			->where(
 				[
 					'comment_id' => $id,
@@ -41,6 +51,7 @@ class CommentFactory {
 
 		$comment->setId( $row->comment_id )
 			->setPageId( $row->page_id )
+			// needs to come from join on revision table
 			->setWikiText( $row->comment_wikitext )
 			->setPostedTime( $row->comment_posted_time )
 			->setActorId( $row->comment_actor_id )
@@ -65,7 +76,7 @@ class CommentFactory {
 
 		$res = $dbr->newSelectQueryBuilder()
 			->select( ISQLPlatform::ALL_ROWS )
-			->from( 'agora_comments' )
+			->from( self::TABLE_NAME )
 			->where(
 				[
 					'comment_page_id' => $pageId,
@@ -80,6 +91,7 @@ class CommentFactory {
 			$comment = new Comment();
 			$comment->setId( $row->comment_id )
 				->setPageId( $row->page_id )
+				// needs to come from join on new revision table
 				->setWikiText( $row->comment_wikitext )
 				->setPostedTime( $row->comment_posted_time )
 				->setActorId( $row->comment_actor_id )
@@ -100,7 +112,7 @@ class CommentFactory {
 
 		$res = $dbr->newSelectQueryBuilder()
 			->select( ISQLPlatform::ALL_ROWS )
-			->from( 'agora_comments' )
+			->from( self::TABLE_NAME )
 			->where(
 				[
 					'comment_actor' => $actorId,
@@ -115,6 +127,7 @@ class CommentFactory {
 			$comment = new Comment();
 			$comment->setId( $row->comment_id )
 				->setPageId( $row->page_id )
+				// needs to come from join on revision table
 				->setWikiText( $row->comment_wikitext )
 				->setPostedTime( $row->comment_posted_time )
 				->setActorId( $row->comment_actor_id )

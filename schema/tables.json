@@ -1,0 +1,194 @@
+[
+  {
+    "name": "agora_comments",
+    "comment": "Holds individual comments from wiki pages",
+    "columns": [
+      {
+        "name": "comment_id",
+        "comment": "Unique ID which can be used to identify an individual comment",
+        "type": "integer",
+        "options": {
+          "unsigned": true,
+          "notnull": true,
+          "autoincrement": true
+        }
+      },
+      {
+        "name": "page_id",
+        "comment": "The ID of the wiki page this comment was posted on",
+        "type": "integer",
+        "options": {
+          "unsigned": true,
+          "notnull": true
+        }
+      },
+      {
+        "name": "comment_actor_id",
+        "comment": "The ID of the actor who posted this comment",
+        "type": "bigint",
+        "options": {
+          "unsigned": true,
+          "notnull": true,
+          "length": 20
+        }
+      },
+      {
+        "name": "comment_parent_id",
+        "comment": "The id of the parent comment if this comment is a reply - null otherwise",
+        "type": "integer",
+        "options": {
+          "unsigned": true,
+          "notnull": false,
+          "default": null
+        }
+      },
+      {
+        "name": "comment_posted_time",
+        "comment": "The timestamp in TS_MW format, when this comment was posted",
+        "type": "mwtimestamp",
+        "options": {
+          "notnull": true
+        }
+      },
+      {
+        "name": "comment_latest_rev_id",
+        "comment": "Revision ID of the latest version of this comment",
+        "type": "integer",
+        "options": {
+          "unsigned": true,
+          "notnull": false
+        }
+      }
+    ],
+    "indexes": [
+      {
+        "name": "comment_page",
+        "columns": [
+          "page_id"
+        ],
+        "unique": false
+      },
+      {
+        "name": "comment_page_posted_time",
+        "columns": [
+          "page_id",
+          "comment_posted_time"
+        ],
+        "unique": false
+      },
+      {
+        "name": "comment_parent",
+        "columns": [
+          "comment_parent_id"
+        ],
+        "unique": false
+      },
+      {
+        "name": "comment_actor_posted_time",
+        "columns": [
+          "comment_actor_id",
+          "comment_posted_time"
+        ],
+        "unique": false
+      },
+      {
+        "name": "comment_latest_rev",
+        "columns": [
+          "comment_latest_rev_id"
+        ],
+        "unique": false
+      }
+    ],
+    "pk": [
+      "comment_id"
+    ]
+  },
+  {
+    "name": "agora_comment_revision",
+    "comment": "This table stores all of the content of comments. Decoupled from the main table and referenced so that we can handle comment histories",
+    "columns": [
+      {
+        "name": "comment_rev_id",
+        "comment": "ID of this revision",
+        "type": "integer",
+        "options": {
+          "unsigned": true,
+          "notnull": true,
+          "autoincrement": true
+        }
+      },
+      {
+        "name": "comment_id",
+        "comment": "The comment this revision belongs to",
+        "type": "integer",
+        "options": {
+          "unsigned": true,
+          "notnull": true
+        }
+      },
+      {
+        "name": "comment_rev_actor_id",
+        "comment": "Actor who made this revision",
+        "type": "bigint",
+        "options": {
+          "unsigned": true,
+          "notnull": true,
+          "length": 20
+        }
+      },
+      {
+        "name": "comment_rev_timestamp",
+        "type": "mwtimestamp",
+        "options": {
+          "notnull": true
+        }
+      },
+      {
+        "name": "comment_html",
+        "comment": "Parsed HTML of the comment which is refreshed each time the comment is edited to save parser bandwidth",
+        "type": "blob",
+        "options": {
+          "notnull": true,
+          "length": 16777215
+        }
+      },
+      {
+        "name": "comment_wikitext",
+        "comment": "The wikitext of the comment",
+        "type": "blob",
+        "options": {
+          "notnull": true,
+          "length": 16777215
+        }
+      }
+    ],
+    "indexes": [
+      {
+        "name": "comment_rev_comment",
+        "columns": [
+          "comment_id"
+        ],
+        "unique": false
+      },
+      {
+        "name": "comment_rev_comment_time",
+        "columns": [
+          "comment_id",
+          "comment_rev_timestamp"
+        ],
+        "unique": false
+      },
+      {
+        "name": "comment_rev_actor_time",
+        "columns": [
+          "comment_rev_actor_id",
+          "comment_rev_timestamp"
+        ],
+        "unique": false
+      }
+    ],
+    "pk": [
+      "comment_rev_id"
+    ]
+  }
+]
