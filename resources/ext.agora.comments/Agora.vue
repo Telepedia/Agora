@@ -1,21 +1,23 @@
 <template>
   <div id="agora-input-box">
-    <div v-html="avatar"></div>
-    <div class="agora-input-body">
-      <div v-if="store.isEditorOpen" class="agora-editor-container">
-        <textarea ref="inputContainer" rows="5" class="ve-mount-point"></textarea>
-        <div class="agora-editor-actions">
-          <button @click="cancelEditor">Cancel</button>
-          <button @click="saveComment">Post</button>
+    <div class="agora-input-row" :class="{ 'agora-input-row--editor-open': store.isEditorOpen }">
+      <div v-html="avatar"></div>
+      <div class="agora-input-body">
+        <div v-if="store.isEditorOpen" class="agora-editor-container">
+          <div ref="inputContainer" class="ve-mount-point"></div>
+        </div>
+        <div
+            v-else
+            class="agora-input-box-placeholder"
+            @click="activateEditor"
+        >
+          {{ $i18n( 'agora-comments-input-placeholder', store.pageTitle ).text() }}
         </div>
       </div>
-      <div
-          v-else
-          class="agora-input-box-placeholder"
-          @click="activateEditor"
-      >
-        {{ $i18n( 'agora-comments-input-placeholder', store.pageTitle ).text() }}
-      </div>
+    </div>
+    <div v-if="store.isEditorOpen" class="agora-editor-actions">
+      <cdx-button weight="quiet" @click="cancelEditor">Cancel</cdx-button>
+      <cdx-button action="progressive" weight="primary" @click="saveComment">Post</cdx-button>
     </div>
   </div>
   <h3>{{ $i18n( 'agora-comments-header', totalCount ).text() }}</h3>
@@ -24,8 +26,12 @@
 <script>
 const { defineComponent, ref, nextTick } = require( 'vue' );
 const { useCommentStore } = require( './store.js' );
+const { CdxButton } = require( './../codex.js' );
 module.exports = defineComponent( {
   name: 'Agora',
+  components: {
+    CdxButton
+  },
   setup() {
     console.log("Agora initialised....");
 
@@ -46,29 +52,39 @@ module.exports = defineComponent( {
     avatar.appendChild( avatarImage );
     const avatarHtml = avatar.outerHTML;
 
-    const cancelEditor = () => {
-      console.log('Cancel editor');
-    }
-
-    const saveComment = () => {
-      console.log('Save comment');
-    }
-
     let inputContainer = ref( null );
+    let editorInstance = null;
 
     const activateEditor = async () => {
       store.toggleEditorOpen();
       await nextTick();
 
       try {
-        editorInstance = new mw.agora.ve.Editor(
-            inputContainer.value,
-            inputContainer.value.value
-        );
+        const target = new mw.agora.ve.Target();
+        target.$element = $( inputContainer.value );
+        target.loadContent( '' );
+        // store a reference here to the target so we can access it later
+        editorInstance = target;
       } catch ( error ) {
         console.error( 'Failed to initialize editor:', error );
       }
     };
+
+    const cancelEditor = () => {
+      if ( editorInstance ) {
+        // destroy the editor instance and do some cleanup
+        editorInstance.destroy();
+
+        // no longer need a local reference to the editor; will be re-initialised when the editor is opened again
+        editorInstance = null;
+      }
+      store.isEditorOpen = false;
+    }
+
+    const saveComment = () => {
+      let content = editorInstance.getSurface().getHtml();
+      console.debug( "[DEBUG]: ", content );
+    }
 
     return {
       totalCount: store.totalComments,
@@ -95,8 +111,18 @@ module.exports = defineComponent( {
   border-radius: 3px;
   padding: 12px;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agora-input-row {
+  display: flex;
   flex-direction: row;
   align-items: center;
+
+  &.agora-input-row--editor-open {
+    align-items: flex-start;
+  }
 }
 
 .agora-avatar {
@@ -119,6 +145,10 @@ module.exports = defineComponent( {
   width: 100%;
 }
 
+.agora-input-body {
+  flex: 1;
+}
+
 .agora-input-box-placeholder {
   font-size: 16px;
   line-height: 1;
@@ -127,4 +157,35 @@ module.exports = defineComponent( {
     cursor: pointer;
   }
 }
+
+.agora-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.agora-input-row.agora-input-row--editor-open {
+    padding-bottom: 18px;
+    border-bottom: 1px solid @border-color-base;
+}
+
+.agora-editor-container {
+  p {
+    font-size: 16px;
+  }
+
+  .oo-ui-toolbar-bar {
+    width: fit-content;
+    box-shadow: none;
+    border-radius: 3px;
+    border: 1px solid @border-color-muted;
+  }
+}
+
+
+
+.ve-mount-point {
+  min-height: 8em;
+}
+
 </style>

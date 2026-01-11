@@ -62,11 +62,11 @@
     "ext.agora.ve": {
       "packageFiles": [
         "ext.agora.ve/index.js",
-        "ext.agora.ve/AgoraTarget.js",
-        "ext.agora.ve/AgoraEditor.js",
-        "ext.agora.ve/config.js"
+        "ext.agora.ve/AgoraTarget.js"
       ],
-      "messages": [],
+      "messages": [
+        "agora-ve-placeholder"
+      ],
       "dependencies": [
         "ext.visualEditor.core",
         "ext.visualEditor.mediawiki",
