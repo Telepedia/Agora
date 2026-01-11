@@ -1,70 +1,67 @@
-const { TOOLBAR_CONFIG } = require( './config.js' );
-
-// first draft; this is adapted from VEForAll and "Yappin" from Weird Gloop
-( function ( mw, OO, ve ) {
+( function () {
     'use strict';
 
-    mw.agora.ve.Target = function ( node, html ) {
-        let config = {};
-        config.toolbarConfig = {};
-        config.toolbarConfig.actions = false;
-        this.toolbarPosition = 'bottom';
-        this.$node = node;
-        mw.agora.ve.Target.parent.call( this, config );
-        this.init( html );
+    mw.agora.ve = {
+        ui: {}
+    };
+
+    mw.agora.ve.Target = function AgoraVeTarget( config ) {
+        config = config || {};
+
+        mw.agora.ve.Target.super.call( this, ve.extendObject( {
+            toolbarConfig: { $overlay: true, position: 'bottom' }
+        }, config ) );
+
+        this.id = config.id;
     };
 
     OO.inheritClass( mw.agora.ve.Target, ve.init.mw.Target );
 
-    mw.agora.ve.Target.prototype.init = function ( html ) {
-        this.createWithContent( html );
-    }
-
     mw.agora.ve.Target.static.name = 'agora';
 
-    mw.agora.ve.Target.static.toolbarGroups = ( function () {
-        return TOOLBAR_CONFIG;
-    }() );
+    mw.agora.ve.Target.static.modes = [ 'visual', 'source' ];
 
-    mw.agora.ve.Target.prototype.createWithContent = function ( html ) {
-        const target = this;
+    mw.agora.ve.Target.static.toolbarGroups = [
+        {
+            name: 'style',
+            title: OO.ui.deferMsg( 'visualeditor-toolbar-style-tooltip' ),
+            include: [ 'bold', 'italic', 'moreTextStyle' ],
+        },
+        {
+            name: 'link',
+            include: [ 'link' ]
+        }
+    ];
 
-        this.addSurface(
-            ve.dm.converter.getModelFromDom(
-                ve.createDocumentFromHtml( html )
-            )
-        );
+    mw.agora.ve.Target.static.importRules = ve.copy( mw.agora.ve.Target.static.importRules );
+    mw.agora.ve.Target.static.importRules.external.blacklist[ 'link/mwExternal' ] = false;
 
-        $( this.$node ).before( this.$element );
+    mw.agora.ve.Target.static.allowTabFocusChange = true;
 
-        $( this.$node ).hide()
-            .removeClass( 'oo-ui-texture-pending' ).prop( 'disabled', false );
+    mw.agora.ve.Target.prototype.addSurface = function ( doc, config ) {
+        config = ve.extendObject( {
+            $overlayContainer: $( '#content' ),
+            placeholder: mw.message( 'agora-ve-placeholder', mw.config.get( 'wgPageName' ) ).text()
+        }, config );
 
-        this.setDir();
-
-        target.once( 'surfaceReady', function () {
-          target.getSurface().getView().focus()
-        } );
-
-        target.getToolbar().onWindowResize();
-        target.onToolbarResize();
-        target.onContainerScroll();
-
-        target.emit( 'editor-ready' );
+        return mw.agora.ve.Target.super.prototype.addSurface.call( this, doc, config );
     };
 
-    mw.agora.ve.Target.prototype.getPageName = function () {
-        return mw.config.get( 'wgPageName' );
-    }
+    mw.agora.ve.Target.prototype.loadContent = function ( content ) {
+        let doc = this.constructor.static.parseDocument( content, this.getDefaultMode(), null );
+        this.originalHtml = content;
 
-    mw.agora.ve.Target.prototype.setDir = function () {
-        const view = this.surface.getView();
-        const dir = $( 'body' ).is( '.rtl' ) ? 'rtl' : 'ltr';
+        this.documentReady( doc );
+    };
 
-        if ( view ) {
-            view.getDocument().setDir( dir );
-        }
+    mw.agora.ve.Target.prototype.attachToolbar = function () {
+        this.$element.after( this.getToolbar().$element );
+    };
+
+    mw.agora.ve.Target.prototype.surfaceReady = function () {
+        mw.agora.ve.Target.super.prototype.surfaceReady.apply( this, arguments );
     }
 
     ve.init.mw.targetFactory.register( mw.agora.ve.Target );
-}( mediaWiki, OO, ve ) );
+
+}() );

@@ -1,5 +1,6 @@
 {
   "agora-comments-enabled": "Allow Comments",
   "agora-comments-header": "$1 Comments",
-  "agora-comments-input-placeholder": "Add a comment about $1"
+  "agora-comments-input-placeholder": "Add a comment about $1",
+  "agora-ve-placeholder": "What's on your mind?"
 }
