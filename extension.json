@@ -32,8 +32,12 @@
   },
   "Hooks": {
     "BeforePageDisplay": "main",
+    "EditPageGetCheckboxesDefinition": "main",
     "MakeGlobalVariablesScript": "main",
-    "LoadExtensionSchemaUpdates": "schema"
+    "LoadExtensionSchemaUpdates": "schema",
+    "GetAllBlockActions": "main",
+    "TitleGetRestrictionTypes": "main",
+    "EditPage::attemptSave:after": "main"
   },
   "ResourceFileModulePaths": {
     "localBasePath": "resources",

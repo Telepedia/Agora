@@ -12,7 +12,8 @@ return [
 		return new CommentService(
 			new ServiceOptions( CommentService::CONSTRUCTOR_OPTIONS, $services->getMainConfig() ),
 			LoggerFactory::getInstance( 'Agora' ),
-			$services->getConnectionProvider()
+			$services->getConnectionProvider(),
+			$services->getRestrictionStore()
 		);
 	},
 ];
