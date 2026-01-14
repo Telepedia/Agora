@@ -2,9 +2,12 @@
 
 namespace Telepedia\Extensions\Agora;
 
+use MediaWiki\Title\Title;
+use MediaWiki\User\UserFactory;
 use stdClass;
 use Telepedia\Extensions\Agora\Domain\Comment;
 use Telepedia\Extensions\Agora\Domain\CommentCollection;
+use Telepedia\UserProfileV2\Avatar\UserProfileV2Avatar;
 use Wikimedia\Rdbms\IConnectionProvider;
 
 class CommentFactory {
@@ -20,7 +23,8 @@ class CommentFactory {
 	private const REVISION_TABLE_NAME = 'agora_comment_revision';
 
 	public function __construct(
-		private readonly IConnectionProvider $connectionProvider
+		private readonly IConnectionProvider $connectionProvider,
+		private readonly UserFactory $userFactory
 	) {}
 
 	/**
@@ -56,8 +60,73 @@ class CommentFactory {
 	 * @param int $pageId
 	 * @return CommentCollection
 	 */
-	public function getForPage( int $pageId ): CommentCollection {
-		// no-op at present
+	public function getForPage( Title $title ): CommentCollection {
+		$articleId = $title->getArticleID();
+		$dbr = $this->connectionProvider->getReplicaDatabase();
+
+		$queryInfo = $this->getQueryInfo();
+
+		$res = $dbr->newSelectQueryBuilder()
+			->select( $queryInfo['fields'] )
+			->from( $queryInfo['tables']['c'], 'c' )
+			->leftJoin(
+				$queryInfo['tables']['r'],
+				'r',
+				$queryInfo['joins']['r'][1]
+			)
+			->where( [ 'c.page_id' => $articleId ] )
+			->caller( __METHOD__ )
+			->fetchResultSet();
+
+		$comments = [];
+		$actorIds = [];
+
+		foreach ( $res as $row ) {
+			$comment = $this->rowToComment( $row );
+			$comments[] = $comment;
+
+			if ( $comment->getActorId() ) {
+				$actorIds[] = $comment->getActorId();
+			}
+		}
+		
+		if ( !empty( $actorIds ) ) {
+			$this->hydrateActors( $comments, array_unique( $actorIds ) );
+		}
+
+		return new CommentCollection( $comments );
+	}
+
+	/**
+	 * Hydrate the comments with actor information such as the avatar and username
+	 * * @param Comment[] $comments
+	 * @param int[] $actorIds Unique list of actor IDs
+	 */
+	private function hydrateActors( array $comments, array $actorIds ): void {
+		$userMap = [];
+
+		foreach ( $actorIds as $actorId ) {
+			$user = $this->userFactory->newFromActorId( $actorId );
+
+			if ( $user->isRegistered() ) {
+				$userMap[ $actorId ] = [
+					'username' => $user->getName(),
+					'avatar'   => ( new UserProfileV2Avatar( $user->getId() ) )->getAvatarUrl( [ 'raw' => true ] ),
+				];
+			}
+		}
+
+		foreach ( $comments as $comment ) {
+			$id = $comment->getActorId();
+
+			if ( isset( $userMap[ $id ] ) ) {
+				$comment->setUsername( $userMap[ $id ]['username'] );
+				$comment->setAvatar( $userMap[ $id ]['avatar'] );
+			} else {
+				$comment->setUsername( wfMessage( 'agora-unknown-user' )->text() );
+				$comment->setAvatar( '' );
+			}
+		}
 	}
 
 	/**

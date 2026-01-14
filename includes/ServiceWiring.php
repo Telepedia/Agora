@@ -22,7 +22,8 @@ return [
 		MediaWikiServices $services
 	): CommentFactory {
 		return new CommentFactory(
-			$services->getConnectionProvider()
+			$services->getConnectionProvider(),
+			$services->getUserFactory()
 		);
 	},
 ];

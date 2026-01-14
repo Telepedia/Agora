@@ -2,9 +2,10 @@
 
 namespace Telepedia\Extensions\Agora\Domain;
 
+use JsonSerializable;
 use MediaWiki\Title\Title;
 
-class Comment {
+class Comment implements JsonSerializable {
 
 	/**
 	 * Unique database ID for this comment
@@ -40,7 +41,7 @@ class Comment {
 	 * ID of the actor who posted this comment
 	 * @var int
 	 */
-	private int $actorId;
+	private ?int $actorId = null;
 
 	/**
 	 * Is this comment deleted?
@@ -59,6 +60,15 @@ class Comment {
 	 * @var string
 	 */
 	private string $html;
+
+	/**
+	 * @var Comment[]
+	 */
+	private array $children = [];
+
+	private string $avatarUrl = '';
+
+	private string $username;
 
 	public function __construct() {}
 
@@ -227,5 +237,64 @@ class Comment {
 	public function setHTML( string $html ): self {
 		$this->html = $html;
 		return $this;
+	}
+
+	/**
+	 * Add a child comment (reply) to this comment
+	 *
+	 * @param Comment $comment
+	 * @return $this the comment instance for easier changing
+	 *
+	 */
+	public function addChild( Comment $comment ): self {
+		$this->children[] = $comment;
+		return $this;
+	}
+
+	/**
+	 * Return the children of this comment (the replies) each will be a comment instance in itself
+	 * @return Comment[]
+	 */
+	public function getChildren(): array {
+		return $this->children;
+	}
+
+	/**
+	 * Set the avatar for the user responsible for this comment
+	 * @param string $avatarUrl
+	 * @return $this the comment instance for easier changing
+	 */
+	public function setAvatar( string $avatarUrl ): self {
+		$this->avatarUrl = $avatarUrl;
+		return $this;
+	}
+
+	public function setUsername( string $username ): self {
+		$this->username = $username;
+		return $this;
+	}
+
+	/**
+	 * Get the username of the actor who posted this comment
+	 * @return string
+	 */
+	public function getUsername(): string {
+		return $this->username;
+	}
+
+	public function jsonSerialize(): array {
+		return [
+			'id' => $this->id,
+			'parentId' => $this->parentId,
+			'html' => $this->html,
+			'timestamp' => $this->postedTime,
+			'author' => [
+				'id' => $this->actorId,
+				'name' => $this->username,
+				'avatar' => $this->avatarUrl
+			],
+			'children' => $this->children,
+			'isDeleted' => $this->isDeleted()
+		];
 	}
 }

@@ -96,6 +96,18 @@
         "Agora.CommentService",
         "TitleFactory"
       ]
+    },
+    {
+      "path": "/comments/v0/comments/{articleId}",
+      "method": [
+        "GET"
+      ],
+      "class": "Telepedia\\Extensions\\Agora\\Rest\\GetCommentsHandler",
+      "services": [
+        "Agora.CommentFactory",
+        "Agora.CommentService",
+        "TitleFactory"
+      ]
     }
   ],
   "ConfigRegistry": {
