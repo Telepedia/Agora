@@ -55,7 +55,14 @@
         "ext.agora.comments/store.js",
         "ext.agora.comments/components/CommentList.vue",
         "ext.agora.comments/comment.js",
-        "ext.agora.comments/utils.js"
+        "ext.agora.comments/utils.js",
+        {
+          "name": "icons.json",
+          "callback": "MediaWiki\\ResourceLoader\\CodexModule::getIcons",
+          "callbackParam": [
+            "cdxIconEllipsis"
+          ]
+        }
       ],
       "messages": [
         "agora-comments-header",
@@ -68,7 +75,8 @@
         "telepedia.fetch"
       ],
       "codexComponents": [
-        "CdxButton"
+        "CdxButton",
+        "CdxIcon"
       ]
     },
     "ext.agora.ve": {

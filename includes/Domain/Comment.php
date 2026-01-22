@@ -285,7 +285,7 @@ class Comment implements JsonSerializable {
 	public function jsonSerialize(): array {
 		return [
 			'id' => $this->id,
-			'parentId' => $this->parentId,
+			'parent' => $this->parentId,
 			'html' => $this->html,
 			'timestamp' => $this->postedTime,
 			'author' => [
