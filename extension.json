@@ -23,7 +23,8 @@
     "includes/ServiceWiring.php"
   ],
   "AvailableRights": [
-    "comments"
+    "comments",
+    "comments-admin"
   ],
   "HookHandlers": {
     "main": {
@@ -56,18 +57,25 @@
         "ext.agora.comments/components/CommentList.vue",
         "ext.agora.comments/comment.js",
         "ext.agora.comments/utils.js",
+        "ext.agora.comments/components/Popover.vue",
         {
           "name": "icons.json",
           "callback": "MediaWiki\\ResourceLoader\\CodexModule::getIcons",
           "callbackParam": [
-            "cdxIconEllipsis"
+            "cdxIconEllipsis",
+            "cdxIconSpeechBubbleAdd"
           ]
         }
       ],
       "messages": [
         "agora-comments-header",
         "agora-comments-input-placeholder",
-        "agora-error-empty-comment"
+        "agora-error-empty-comment",
+        "agora-action-edit",
+        "agora-action-report",
+        "agora-action-follow",
+        "agora-action-history",
+        "agora-action-delete"
       ],
       "dependencies": [
         "pinia",

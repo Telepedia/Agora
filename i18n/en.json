@@ -10,5 +10,10 @@
   "agora-error-parent-deleted": "Cannot reply to this comment as it is deleted",
   "agora-error-parent": "Cannot reply to this comment as it has a parent",
   "agora-error-comments-disabled": "Comments are not enabled on this article",
-  "agora-error-empty-comment": "Comment is empty"
+  "agora-error-empty-comment": "Comment is empty",
+  "agora-action-edit": "Edit Comment",
+  "agora-action-delete": "Delete Comment",
+  "agora-action-follow": "Follow Comment",
+  "agora-action-report": "Report Comment",
+  "agora-action-history": "History"
 }

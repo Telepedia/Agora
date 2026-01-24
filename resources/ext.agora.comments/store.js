@@ -45,11 +45,12 @@ const useCommentStore = defineStore( 'comments', {
             const response  =  await restClient.get( `/comments/v0/comments/${this.pageId}`);
             const comments = [];
 
-            for ( const data of response ) {
+            for ( const data of response.comments ) {
                 comments.push( new Comment( data ) );
             }
 
             this.comments = comments;
+            this.isModerator = response.isMod ?? false;
         }
     }
 } );

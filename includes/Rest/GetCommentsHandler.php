@@ -35,9 +35,12 @@ class GetCommentsHandler extends SimpleHandler {
 			);
 		}
 
-		$comments = $this->commentFactory->getForPage( $title );
+		$allComments = $this->commentFactory->getForPage( $title );
+		$comments['comments'] = $allComments->jsonSerialize();
 
-		return $this->getResponseFactory()->createJson( $comments->jsonSerialize() );
+		$comments['isMod'] = $this->getAuthority()->isDefinitelyAllowed( 'comments-admin' );
+
+		return $this->getResponseFactory()->createJson( $comments );
 	}
 
 	/**
