@@ -38,7 +38,7 @@
             </div>
           </div>
           <div v-html="comment.html"></div>
-          <div class="comment__body-interactions">
+          <div class="comment__body-interactions" v-if="!comment.isDeleted">
             <div class="comment__body-interactions-reply">
             <cdx-icon
                 :icon="cdxIconSpeechBubbleAdd"
