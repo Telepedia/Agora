@@ -267,4 +267,34 @@ class CommentService {
 
 		return StatusValue::newGood();
 	}
+
+	/**
+	 * Restore a comment
+	 * @param Comment $comment the comment we are restoring
+	 * @param int $actorId the actor responsible for restoring this comment. Unused at present, but here for when
+	 * we log to S:Log.
+	 * @return StatusValue
+	 */
+	public function restoreComment( Comment $comment, int $actorId ): StatusValue {
+		$dbw = $this->connectionProvider->getPrimaryDatabase();
+
+		$dbw->newUpdateQueryBuilder()
+			->update( self::TABLE_NAME )
+			->set( [
+				'comment_deleted_actor' => null,
+			] )
+			->where( [
+				'comment_id' => $comment->getId()
+			] )
+			->caller( __METHOD__ )
+			->execute();
+
+		$affected = $dbw->affectedRows();
+
+		if ( $affected !== 1 ) {
+			return StatusValue::newFatal( 'agora-error-delete-writes', $affected );
+		}
+
+		return StatusValue::newGood();
+	}
 }

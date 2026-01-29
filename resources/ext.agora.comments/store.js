@@ -58,6 +58,68 @@ const useCommentStore = defineStore( 'comments', {
             );
 
             this.commentCount = response.comments.length;
+        },
+
+        /**
+         * Delete a comment from the stack - note this doesn't do much except mark the comment as deleted, and then
+         * hide it in the UI until the next refresh, at which point it will either be returned from the API or not
+         * depending on the users preferences to show or hide deleted comments
+         * @param id
+         * @returns {Promise<void>}
+         */
+        async deleteComment( id ) {
+            try {
+                await restClient.delete( `/comments/v0/comments/delete`, {
+                    commentId: id,
+                    token: mw.user.tokens.get( 'csrfToken' )
+                } );
+
+                const comment = this.comments.find( c => c.id === id );
+                if ( comment ) {
+                    comment.isDeleted = true;
+                }
+
+                new Toast('Comment has been successfully deleted', {
+                    type: 'success',
+                    position: 'bottom-left'
+                } ).show();
+
+            } catch ( e ) {
+                new Toast(e.message || "An error occurred whilst deleting the comment", {
+                    type: 'error',
+                    position: 'bottom-left'
+                } ).show();
+            }
+        },
+
+        /**
+         * Restore a comment back to the stack
+         * @param id the id of the comment which we want to restore
+         * @returns {Promise<void>}
+         */
+        async restoreComment( id ) {
+            try {
+                await restClient.patch( `/comments/v0/comments/restore`, {
+                    commentId: id,
+                    token: mw.user.tokens.get( 'csrfToken' )
+                } );
+
+                const comment = this.comments.find( c => c.id === id );
+                if ( comment ) {
+                    comment.isDeleted = false;
+                }
+
+                new Toast('Comment has been successfully restored', {
+                    type: 'success',
+                    position: 'bottom-left'
+                } ).show();
+
+            } catch ( e ) {
+                new Toast( e.message || "An error occurred whilst restoring the comment", {
+                    type: 'error',
+                    position: 'bottom-left'
+                } ).show();
+            }
         }
     }
 } );

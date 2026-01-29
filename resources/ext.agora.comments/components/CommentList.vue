@@ -7,7 +7,7 @@
             <div class="comment__body-deleted-text">
               {{ $i18n('agora-comment-deleted').text() }}
             </div>
-            <cdx-icon class="comment__restore-icon" :icon="cdxIconRestore"></cdx-icon>
+            <cdx-icon class="comment__restore-icon" :icon="cdxIconRestore" @click="restoreComment(comment.id)"></cdx-icon>
           </div>
         </div>
         <div class="comment__body">
@@ -108,38 +108,20 @@ module.exports = defineComponent( {
       if ( store.isModerator ) {
         actions.delete = {
           title: mw.message( 'agora-action-delete' ).text(),
-          action: ( id ) => deleteComment( id )
+          action: ( id ) => store.deleteComment( id )
         };
       }
 
       return actions;
     } );
 
-    /**
-     * Delete a comment; if the user has the toggle to show deleted comments, the comment will still appear
-     * in the list for them. If they have toggled that off, then it will immediately be removed from the stack
-     * Deleting a comment will remove its children from the stack also
-     * @param id
-     * @returns {Promise<void>}
-     */
-    async function deleteComment( id ) {
-      try {
-        await restClient.delete(`/comments/v0/comments/delete`, {
-          commentId: id,
-          token: mw.user.tokens.get( 'csrfToken' )
-        });
-
-      } catch ( e ) {
-        console.error( e );
-      }
-    }
-
     return {
       comments,
       cdxIconEllipsis,
       cdxIconSpeechBubbleAdd,
       commentActions,
-      cdxIconRestore
+      cdxIconRestore,
+      restoreComment: store.restoreComment
     }
   }
 } );

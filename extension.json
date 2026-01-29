@@ -82,7 +82,8 @@
       "dependencies": [
         "pinia",
         "ext.agora.ve",
-        "telepedia.fetch"
+        "telepedia.fetch",
+        "ext.mediawiki.toast"
       ],
       "codexComponents": [
         "CdxButton",
@@ -136,6 +137,17 @@
         "DELETE"
       ],
       "class": "Telepedia\\Extensions\\Agora\\Rest\\DeleteCommentHandler",
+      "services": [
+        "Agora.CommentFactory",
+        "Agora.CommentService"
+      ]
+    },
+    {
+      "path": "/comments/v0/comments/restore",
+      "method": [
+        "PATCH"
+      ],
+      "class": "Telepedia\\Extensions\\Agora\\Rest\\RestoreCommentHandler",
       "services": [
         "Agora.CommentFactory",
         "Agora.CommentService"
